@@ -154,7 +154,7 @@ public class QuanLyDatPhongServiceImpl implements IQuanLyDatPhongService {
     private DatPhongResponse convertToResponse(DatPhong datPhong) {
         DatPhongResponse response = new DatPhongResponse();
         response.setId(datPhong.getId());
-        response.setKhachHangId(datPhong.getKhachHang().getId());
+        response.setKhachHangId(datPhong.getKhachHang().getMaKH());
         response.setPhongId(datPhong.getPhong().getId());
         response.setThoiGianVao(datPhong.getThoiGianVao());
         response.setThoiGianRaDuKien(datPhong.getThoiGianRaDuKien());
