@@ -29,10 +29,15 @@ public class QuanLyNhapKhoController {
 
     @GetMapping("/{maPhieuNhap}")
     @Operation(summary = "Xem chi tiết phiếu nhập")
-    public ResponseEntity<PhieuNhap> xemChiTiet(@PathVariable Integer maPhieuNhap) {
-        Optional<PhieuNhap> phieu = quanLyNhapKhoService.xemChiTiet(maPhieuNhap);
-        return phieu.map(ResponseEntity::ok)
-                .orElseThrow(() -> new com.nnice.karaoke.exception.ResourceNotFoundException("Phiếu nhập không tìm thấy"));
+    public ResponseEntity<?> xemChiTiet(@PathVariable Integer maPhieuNhap) {
+        try {
+            Optional<PhieuNhap> phieu = quanLyNhapKhoService.xemChiTiet(maPhieuNhap);
+            return phieu.map(ResponseEntity::ok)
+                    .orElseThrow(() -> new com.nnice.karaoke.exception.ResourceNotFoundException("Phiếu nhập không tìm thấy"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Lỗi: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{maPhieuNhap}")

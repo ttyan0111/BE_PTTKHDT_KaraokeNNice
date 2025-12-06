@@ -1,5 +1,5 @@
 
-CREATE DATABASE KaraokeNiceDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS KaraokeNiceDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE KaraokeNiceDB;
 
 
@@ -349,3 +349,4 @@ CREATE INDEX idx_bangchamcong_nhanvien ON BangChamCong(MaNV);
 CREATE INDEX idx_bangchamcong_ngaylam ON BangChamCong(NgayLam);
 CREATE INDEX idx_bangluong_nhanvien ON BangLuong(MaNV);
 CREATE INDEX idx_bangluong_thangnam ON BangLuong(Thang, Nam);
+

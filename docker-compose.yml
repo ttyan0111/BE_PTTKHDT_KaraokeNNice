@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: karaoke-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: KaraokeNiceDB
+      MYSQL_USER: karaoke_user
+      MYSQL_PASSWORD: karaoke_pass
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./ScriptPTTKHDT.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - karaoke-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+volumes:
+  mysql_data:
+
+networks:
+  karaoke-network:
+    driver: bridge
