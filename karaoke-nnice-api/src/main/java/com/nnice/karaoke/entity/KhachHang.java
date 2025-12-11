@@ -32,15 +32,6 @@ public class KhachHang {
     @Column(name = "Email", length = 100)
     private String email;
     
-    @Column(name = "DiaChi", length = 255)
-    private String diaChi;
-    
-    @Column(name = "NgaySinh")
-    private LocalDate ngaySinh;
-    
-    @Column(name = "GioiTinh", length = 10)
-    private String gioiTinh;
-    
     @Column(name = "CMND", length = 20)
     private String cmnd;
     
