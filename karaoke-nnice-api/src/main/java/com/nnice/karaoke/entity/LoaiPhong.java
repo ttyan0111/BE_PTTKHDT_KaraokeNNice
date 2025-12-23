@@ -26,6 +26,9 @@ public class LoaiPhong {
     @Column(name = "SucChua")
     private Integer sucChua;
     
+    @Column(name = "GiaTheoGio")
+    private Long giaTheoGio;
+    
     @Column(name = "MoTa", length = 255)
     private String moTa;
 }

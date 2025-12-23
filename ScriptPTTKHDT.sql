@@ -117,6 +117,7 @@ CREATE TABLE Phong (
     TrangThai VARCHAR(50),
     MaCS INT,
     MaLoai INT,
+    Tang INT DEFAULT 1,
     FOREIGN KEY (MaCS) REFERENCES CoSo(MaCS),
     FOREIGN KEY (MaLoai) REFERENCES LoaiPhong(MaLoai)
 );
@@ -349,4 +350,54 @@ CREATE INDEX idx_bangchamcong_nhanvien ON BangChamCong(MaNV);
 CREATE INDEX idx_bangchamcong_ngaylam ON BangChamCong(NgayLam);
 CREATE INDEX idx_bangluong_nhanvien ON BangLuong(MaNV);
 CREATE INDEX idx_bangluong_thangnam ON BangLuong(Thang, Nam);
+
+ALTER TABLE KhachHang DROP COLUMN DiaChi, DROP COLUMN NgaySinh, DROP COLUMN GioiTinh;
+
+-- ============= TÀI KHOẢN (CREDENTIALS) =============
+-- Bảng lưu thông tin đăng nhập của KhachHang và NhanVien
+-- Flow: Tạo KhachHang -> Tạo TaiKhoan (MaKhachHang liên kết)
+CREATE TABLE TaiKhoan (
+    MaTaiKhoan INT AUTO_INCREMENT PRIMARY KEY,
+    TenDangNhap VARCHAR(50) UNIQUE NOT NULL,
+    MatKhauHash VARCHAR(255) NOT NULL,                -- Password đã hash (BCrypt)
+    LoaiTaiKhoan VARCHAR(20) DEFAULT 'KHACH_HANG',   -- Mặc định KHACH_HANG, admin update sau nếu cần
+    MaKhachHang INT NULL,                            -- NULL nếu là NHAN_VIEN
+    MaNhanVien INT NULL,                             -- NULL nếu là KHACH_HANG
+    TrangThai VARCHAR(50) DEFAULT 'Hoat dong',       -- Hoat dong / Bi khoa
+    NgayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    NgayCapNhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (MaKhachHang) REFERENCES KhachHang(MaKH) ON DELETE CASCADE,
+    FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNV) ON DELETE CASCADE,
+    CONSTRAINT chk_loai CHECK (LoaiTaiKhoan IN ('KHACH_HANG', 'NHAN_VIEN')),
+    CONSTRAINT chk_taikhoan_link CHECK (
+        (LoaiTaiKhoan = 'KHACH_HANG' AND MaKhachHang IS NOT NULL AND MaNhanVien IS NULL) OR
+        (LoaiTaiKhoan = 'NHAN_VIEN' AND MaNhanVien IS NOT NULL AND MaKhachHang IS NULL)
+    )
+);
+
+-- Index để tăng tốc độ tìm kiếm
+CREATE INDEX idx_taikhoan_tendangnhap ON TaiKhoan(TenDangNhap);
+CREATE INDEX idx_taikhoan_loai ON TaiKhoan(LoaiTaiKhoan);
+CREATE INDEX idx_taikhoan_makhachhang ON TaiKhoan(MaKhachHang);
+CREATE INDEX idx_taikhoan_manhanvien ON TaiKhoan(MaNhanVien);
+CREATE INDEX idx_taikhoan_trangthai ON TaiKhoan(TrangThai);
+
+-- ============= INSERT DEFAULT DATA =============
+-- Insert default CoSo (Branch)
+INSERT INTO CoSo (TenCS, DiaChi, SDT) VALUES
+('Chi Nhánh Trung Tâm', '123 Đường Âm Nhạc, Quận 1, TP.HCM', '0123456789');
+
+-- Insert default NhanVien (Admin)
+INSERT INTO NhanVien (HoTen, ChucVu, SDT, Email, DiaChi, NgayVaoLam, HeSoLuong, TrangThai, MaCS) VALUES
+('Quản Trị Viên', 'Quản Trị Hệ Thống', '0123456789', 'admin@karaoke.com', 'Hệ Thống', CURRENT_DATE, 1.5, 'Dang lam viec', 1);
+
+-- Insert default TaiKhoan for Admin (Password: admin123 - BCrypt hash)
+-- Hash: $2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/Ko2
+INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, LoaiTaiKhoan, MaNhanVien, TrangThai) VALUES
+('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWdeS86E36P4/Ko2', 'NHAN_VIEN', 1, 'Hoat dong');
+
+
+-- ============= MIGRATION: Add Tang & ViTri columns if they don't exist =============
+ALTER TABLE Phong ADD COLUMN Tang INT DEFAULT 1 AFTER MaLoai;
+
 

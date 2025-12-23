@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/khach-hang")
+@RequestMapping("/api/khach-hang")
 @Tag(name = "Quản Lý Khách Hàng", description = "API quản lý khách hàng")
 public class QuanLyKhachHangController {
 
@@ -94,6 +94,8 @@ public class QuanLyKhachHangController {
     @Operation(summary = "Lấy danh sách tất cả khách hàng")
     public ResponseEntity<List<KhachHang>> getAllKhachHang() {
         List<KhachHang> khachHangList = khachHangRepository.findAll();
+
+        
         return ResponseEntity.ok(khachHangList);
     }
 

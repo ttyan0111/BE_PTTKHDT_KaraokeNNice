@@ -74,6 +74,9 @@ public class QuanLyTaiKhoanNhanVienController {
     @Operation(summary = "Danh sách tài khoản")
     public ResponseEntity<List<NhanVien>> danhSachTaiKhoan() {
         List<NhanVien> result = quanLyTaiKhoanNhanVienService.danhSachTaiKhoan();
+        System.out.println("=== DANH SÁCH NHÂN VIÊN ===");
+        System.out.println("Total employees: " + result.size());
+        result.forEach(nv -> System.out.println("NV: " + nv.getMaNV() + " - " + nv.getHoTen()));
         return ResponseEntity.ok(result);
     }
 

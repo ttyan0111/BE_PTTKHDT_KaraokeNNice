@@ -50,7 +50,11 @@ public class QuanLyTaiKhoanNhanVienServiceImpl implements QuanLyTaiKhoanNhanVien
     
     @Override
     public List<NhanVien> danhSachTaiKhoan() {
-        return nhanVienRepository.findAll();
+        List<NhanVien> result = nhanVienRepository.findAll();
+        System.out.println("=== danhSachTaiKhoan() ===");
+        System.out.println("Total: " + result.size());
+        result.forEach(nv -> System.out.println("- " + nv.getMaNV() + ": " + nv.getHoTen()));
+        return result;
     }
     
     @Override

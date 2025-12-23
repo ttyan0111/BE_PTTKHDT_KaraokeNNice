@@ -2,6 +2,7 @@ package com.nnice.karaoke.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,14 +62,18 @@ public class NhanVien {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaCS")
+    @JsonIgnore
     private CoSo coSo;
     
     @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<BangChamCong> bangChamCongs;
     
     @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<BangLuong> bangLuongs;
     
     @OneToMany(mappedBy = "nhanVien", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<PhieuSuDung> phieuSuDungs;
 }
