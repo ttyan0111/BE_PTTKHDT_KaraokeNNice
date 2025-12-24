@@ -40,27 +40,47 @@ public class TaiKhoanService {
      * Đăng nhập - login
      */
     public LoginResponse login(LoginRequest request) {
+        // DEBUG LOG
+        System.out.println("=== LOGIN DEBUG ===");
+        System.out.println("Username: " + request.getTenDangNhap());
+        System.out.println("Password (raw): " + request.getMatKhau());
+        System.out.println("Password length: " + (request.getMatKhau() != null ? request.getMatKhau().length() : "NULL"));
+        
         // 1. Tìm tài khoản theo tên đăng nhập
         Optional<TaiKhoan> optionalTaiKhoan = taiKhoanRepository.findByTenDangNhap(request.getTenDangNhap());
         
         if (!optionalTaiKhoan.isPresent()) {
+            System.out.println("ERROR: Tài khoản không tồn tại!");
             throw new RuntimeException("Tên đăng nhập không tồn tại");
         }
 
         TaiKhoan taiKhoan = optionalTaiKhoan.get();
+        System.out.println("Found account: " + taiKhoan.getTenDangNhap());
+        System.out.println("Password Hash in DB: " + taiKhoan.getMatKhauHash());
 
         // 2. Kiểm tra trạng thái tài khoản
         if (!"Hoat dong".equals(taiKhoan.getTrangThai())) {
+            System.out.println("ERROR: Tài khoản bị khóa! Status: " + taiKhoan.getTrangThai());
             throw new RuntimeException("Tài khoản đã bị khóa");
         }
 
         // 3. So sánh password
-        if (!passwordEncoder.matches(request.getMatKhau(), taiKhoan.getMatKhauHash())) {
+        boolean passwordMatches = passwordEncoder.matches(request.getMatKhau(), taiKhoan.getMatKhauHash());
+        System.out.println("Password matches: " + passwordMatches);
+        
+        if (!passwordMatches) {
+            System.out.println("ERROR: Mật khẩu không khớp!");
             throw new RuntimeException("Mật khẩu không chính xác");
         }
+        
+        System.out.println("Login successful!");
+        System.out.println("==================");
 
         // 4. Lấy thông tin người dùng
         String hoTen = "";
+        String chucVu = null;
+        Integer maNhanVien = null;
+        
         if ("KHACH_HANG".equals(taiKhoan.getLoaiTaiKhoan()) && taiKhoan.getMaKhachHang() != null) {
             // Lấy tên từ KhachHang
             Optional<KhachHang> khachHang = khachHangRepository.findById(taiKhoan.getMaKhachHang());
@@ -68,10 +88,12 @@ public class TaiKhoanService {
                 hoTen = khachHang.get().getTenKH();
             }
         } else if ("NHAN_VIEN".equals(taiKhoan.getLoaiTaiKhoan()) && taiKhoan.getMaNhanVien() != null) {
-            // Lấy tên từ NhanVien
+            // Lấy tên và chức vụ từ NhanVien
             Optional<NhanVien> nhanVien = nhanVienRepository.findById(taiKhoan.getMaNhanVien());
             if (nhanVien.isPresent()) {
                 hoTen = nhanVien.get().getHoTen();
+                chucVu = nhanVien.get().getChucVu();  // TiepTan, KeToan, Bep, PhucVu
+                maNhanVien = nhanVien.get().getMaNV();
             }
         }
 
@@ -93,6 +115,12 @@ public class TaiKhoanService {
             hoTen,
             token
         );
+        
+        // Thêm thông tin nhân viên nếu có
+        if (maNhanVien != null) {
+            response.setMaNhanVien(maNhanVien);
+            response.setChucVu(chucVu);
+        }
 
         return response;
     }
