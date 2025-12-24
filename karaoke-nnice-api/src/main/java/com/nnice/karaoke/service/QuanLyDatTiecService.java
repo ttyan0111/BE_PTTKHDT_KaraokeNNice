@@ -2,7 +2,10 @@ package com.nnice.karaoke.service;
 
 import com.nnice.karaoke.dto.request.DatTiecRequest;
 import com.nnice.karaoke.dto.response.DatTiecResponse;
+import com.nnice.karaoke.dto.response.HoanCocResponse;
+import com.nnice.karaoke.dto.response.SanhTiecResponse;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface QuanLyDatTiecService {
@@ -35,4 +38,13 @@ public interface QuanLyDatTiecService {
     
     // Gửi xác nhận
     void guiXacNhan(Integer maTiec);
+    
+    // Lấy danh sách sảnh trống
+    List<SanhTiecResponse> layDanhSachSanhTrong(LocalDateTime tuNgay, LocalDateTime denNgay);
+    
+    // Tính tiền hoàn cọc
+    HoanCocResponse tinhTienHoanCoc(Integer maTiec);
+    
+    // Kiểm tra sảnh có trống không
+    boolean kiemTraSanhTrong(Integer maSanh, LocalDateTime ngayToChuc);
 }

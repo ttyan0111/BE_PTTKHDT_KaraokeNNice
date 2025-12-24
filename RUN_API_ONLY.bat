@@ -10,7 +10,7 @@ echo ║        (MySQL container must be running)                  ║
 echo ╚════════════════════════════════════════════════════════════╝
 echo.
 
-cd "D:\User\File\Code\PTTKHDT_GIT\PTTKHDT_KaraokeNNice\karaoke-nnice-api"
+cd "%~dp0karaoke-nnice-api"
 
 echo [1/2] Building application...
 call mvn clean package -DskipTests -q

@@ -39,8 +39,16 @@ timeout /t 3 /nobreak
 REM Build and Start Spring Boot
 echo.
 echo [3/3] Building and starting Spring Boot API...
-cd "D:\User\File\Code\PTTKHDT_GIT\PTTKHDT_KaraokeNNice\karaoke-nnice-api"
-call mvn clean package -DskipTests -q
+cd "%~dp0karaoke-nnice-api"
+
+REM Clean target directory first
+if exist target (
+    echo Cleaning target directory...
+    rmdir /s /q target >nul 2>&1
+)
+
+REM Build with Maven
+call mvn clean compile package -DskipTests -Dmaven.compiler.useIncrementalCompilation=false
 if errorlevel 1 (
     echo ❌ Build failed
     pause

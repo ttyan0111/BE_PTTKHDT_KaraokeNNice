@@ -30,6 +30,10 @@ public class DonDatTiec {
     @JoinColumn(name = "MaGoi")
     private GoiTiec goiTiec;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "MaSanh")
+    private SanhTiec sanhTiec;
+    
     @Column(name = "NgayToChuc")
     private LocalDateTime ngayToChuc;
     
@@ -43,5 +47,17 @@ public class DonDatTiec {
     private BigDecimal tienCoc;
     
     @Column(name = "TrangThai", length = 50)
-    private String trangThai;
+    private String trangThai; // CHO_XAC_NHAN, DA_COC, DA_THANH_TOAN, HUY
+    
+    @Column(name = "NgayDat")
+    private LocalDateTime ngayDat;
+    
+    @Column(name = "LyDoHuy", columnDefinition = "TEXT")
+    private String lyDoHuy;
+    
+    @Column(name = "TienHoanCoc")
+    private BigDecimal tienHoanCoc;
+    
+    @Column(name = "GhiChu", columnDefinition = "TEXT")
+    private String ghiChu;
 }

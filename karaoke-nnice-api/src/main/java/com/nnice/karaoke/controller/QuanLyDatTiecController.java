@@ -2,20 +2,24 @@ package com.nnice.karaoke.controller;
 
 import com.nnice.karaoke.dto.request.DatTiecRequest;
 import com.nnice.karaoke.dto.response.DatTiecResponse;
-import com.nnice.karaoke.exception.ResourceNotFoundException;
+import com.nnice.karaoke.dto.response.HoanCocResponse;
+import com.nnice.karaoke.dto.response.SanhTiecResponse;
 import com.nnice.karaoke.service.QuanLyDatTiecService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/dat-tiec")
 @Tag(name = "Quản Lý Đặt Tiệc", description = "API quản lý đặt tiệc")
+@CrossOrigin(origins = "*")
 public class QuanLyDatTiecController {
 
     @Autowired
@@ -79,7 +83,8 @@ public class QuanLyDatTiecController {
 
     @GetMapping("/danh-sach")
     @Operation(summary = "Danh sách đặt tiệc theo trạng thái")
-    public ResponseEntity<List<DatTiecResponse>> danhSachDatTiec(@RequestParam String trangThai) {
+    public ResponseEntity<List<DatTiecResponse>> danhSachDatTiec(
+            @RequestParam(required = false) String trangThai) {
         List<DatTiecResponse> list = quanLyDatTiecService.danhSachDatTiec(trangThai);
         return ResponseEntity.ok(list);
     }
@@ -96,5 +101,30 @@ public class QuanLyDatTiecController {
     public ResponseEntity<Void> guiXacNhan(@PathVariable Integer maTiec) {
         quanLyDatTiecService.guiXacNhan(maTiec);
         return ResponseEntity.ok().build();
+    }
+    
+    @GetMapping("/sanh-trong")
+    @Operation(summary = "Lấy danh sách sảnh trống trong khoảng thời gian")
+    public ResponseEntity<List<SanhTiecResponse>> layDanhSachSanhTrong(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime tuNgay,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime denNgay) {
+        List<SanhTiecResponse> list = quanLyDatTiecService.layDanhSachSanhTrong(tuNgay, denNgay);
+        return ResponseEntity.ok(list);
+    }
+    
+    @GetMapping("/tinh-hoan-coc/{maTiec}")
+    @Operation(summary = "Tính tiền hoàn cọc khi hủy tiệc")
+    public ResponseEntity<HoanCocResponse> tinhTienHoanCoc(@PathVariable Integer maTiec) {
+        HoanCocResponse result = quanLyDatTiecService.tinhTienHoanCoc(maTiec);
+        return ResponseEntity.ok(result);
+    }
+    
+    @GetMapping("/kiem-tra-sanh")
+    @Operation(summary = "Kiểm tra sảnh có trống không")
+    public ResponseEntity<Boolean> kiemTraSanhTrong(
+            @RequestParam Integer maSanh,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime ngayToChuc) {
+        boolean coTrong = quanLyDatTiecService.kiemTraSanhTrong(maSanh, ngayToChuc);
+        return ResponseEntity.ok(coTrong);
     }
 }

@@ -16,7 +16,11 @@ public class DatTiecRequest {
     
     private Integer maGoi;
     
+    private Integer maSanh; // Có thể null nếu chưa chọn sảnh
+    
     private LocalDateTime ngayToChuc;
     
     private Integer soLuongNguoi;
+    
+    private String ghiChu;
 }
