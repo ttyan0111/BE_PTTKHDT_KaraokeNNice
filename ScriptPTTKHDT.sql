@@ -405,6 +405,37 @@ INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, LoaiTaiKhoan, MaNhanVien, TrangT
 ('bep', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'NHAN_VIEN', 4, 'Hoat dong'),
 ('phucvu', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'NHAN_VIEN', 5, 'Hoat dong');
 
+-- ============= INSERT SAMPLE MENU ITEMS (MatHang) =============
+-- Đồ Ăn (Food)
+INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
+('Gà rán', 'Đồ Ăn', 20, 'cái', 50000, 85000, 'Gà rán giòn ngoài mềm trong', 'Con hang'),
+('Cơm tấm', 'Đồ Ăn', 15, 'suất', 40000, 65000, 'Cơm tấm cá chiên', 'Con hang'),
+('Mỳ Ý', 'Đồ Ăn', 10, 'suất', 45000, 75000, 'Mỳ Ý sốt cà chua tươi', 'Con hang'),
+('Pizza', 'Đồ Ăn', 8, 'cái', 60000, 120000, 'Pizza hải sản tươi', 'Con hang'),
+('Bánh mì', 'Đồ Ăn', 25, 'cái', 15000, 35000, 'Bánh mì thịt xá xíu', 'Con hang');
+
+-- Đồ Uống (Drinks)
+INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
+('Nước cam', 'Đồ Uống', 30, 'ly', 12000, 25000, 'Nước cam tươi ép mỗi ngày', 'Con hang'),
+('Nước Coke', 'Đồ Uống', 25, 'chai', 8000, 20000, 'Coca Cola lạnh', 'Con hang'),
+('Café', 'Đồ Uống', 18, 'ly', 12000, 30000, 'Café đen nóng/lạnh', 'Con hang'),
+('Trà xanh', 'Đồ Uống', 22, 'ly', 10000, 25000, 'Trà xanh tươi', 'Con hang'),
+('Smoothie', 'Đồ Uống', 12, 'ly', 20000, 45000, 'Smoothie trái cây mùa hè', 'Con hang');
+
+-- Rượu & Bia (Alcohol)
+INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
+('Bia Saigon', 'Rượu & Bia', 40, 'chai', 20000, 35000, 'Bia Saigon lạnh', 'Con hang'),
+('Bia Heineken', 'Rượu & Bia', 20, 'chai', 30000, 50000, 'Bia Heineken nhập khẩu', 'Con hang'),
+('Rượu Vodka', 'Rượu & Bia', 8, 'chai', 100000, 150000, 'Vodka Skyy cao cấp', 'Con hang'),
+('Bia Corona', 'Rượu & Bia', 15, 'chai', 25000, 45000, 'Bia Corona', 'Con hang'),
+('Rượu Vang đỏ', 'Rượu & Bia', 5, 'chai', 150000, 250000, 'Rượu Vang đỏ Pháp', 'Con hang');
+
+-- Tráng Miệng (Dessert)
+INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
+('Kem ốc quế', 'Tráng Miệng', 12, 'cái', 15000, 30000, 'Kem ốc quế vani', 'Con hang'),
+('Bánh flan', 'Tráng Miệng', 15, 'cái', 10000, 20000, 'Bánh flan trứng', 'Con hang'),
+('Choco cake', 'Tráng Miệng', 8, 'miếng', 25000, 50000, 'Bánh chocolate tươi', 'Con hang'),
+('Pudding', 'Tráng Miệng', 10, 'cái', 12000, 25000, 'Pudding sô cô la', 'Con hang');
 
 -- ============= MIGRATION: Add Tang & ViTri columns if they don't exist =============
 -- Sử dụng procedure để tránh lỗi khi cột đã tồn tại
