@@ -5,10 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-<<<<<<< HEAD
-=======
 import java.math.BigDecimal;
->>>>>>> dfcaa481bb52121934f74ec43d094c1d1c9211d3
 import java.util.List;
 
 @Repository
@@ -17,8 +14,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
      * Tìm tất cả hóa đơn theo trạng thái
      */
     List<HoaDon> findByTrangThai(String trangThai);
-<<<<<<< HEAD
-=======
     
     /**
      * Lấy doanh thu theo tháng trong năm
@@ -63,6 +58,5 @@ public interface HoaDonRepository extends JpaRepository<HoaDon, Integer> {
            "WHERE YEAR(h.ngayLap) = YEAR(CURDATE()) " +
            "AND h.trangThai = 'Hoai thanh toan'")
     BigDecimal getCurrentYearRevenue();
->>>>>>> dfcaa481bb52121934f74ec43d094c1d1c9211d3
 }
 
