@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/thanh-vien")
@@ -19,6 +20,13 @@ public class QuanLyThanhVienThietController {
 
     @Autowired
     private QuanLyThanhVienThietService quanLyThanhVienThietService;
+
+    @GetMapping
+    @Operation(summary = "Lấy tất cả thành viên")
+    public ResponseEntity<List<TheThanhVien>> getAllThanhVien() {
+        List<TheThanhVien> members = quanLyThanhVienThietService.danhSach();
+        return ResponseEntity.ok(members);
+    }
 
     @PostMapping
     @Operation(summary = "Đăng ký thành viên mới")

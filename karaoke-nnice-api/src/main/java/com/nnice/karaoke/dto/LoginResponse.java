@@ -5,6 +5,8 @@ public class LoginResponse {
     private String tenDangNhap;
     private String loaiTaiKhoan;
     private Integer maKhachHang;
+    private Integer maNhanVien;
+    private String chucVu;  // Chức vụ của nhân viên (TiepTan, KeToan, Bep, PhucVu)
     private String hoTen;
     private String soDienThoai;
     private String email;
@@ -77,6 +79,22 @@ public class LoginResponse {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Integer getMaNhanVien() {
+        return maNhanVien;
+    }
+
+    public void setMaNhanVien(Integer maNhanVien) {
+        this.maNhanVien = maNhanVien;
+    }
+
+    public String getChucVu() {
+        return chucVu;
+    }
+
+    public void setChucVu(String chucVu) {
+        this.chucVu = chucVu;
     }
 
     public String getToken() {

@@ -2,7 +2,6 @@
 CREATE DATABASE IF NOT EXISTS KaraokeNiceDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE KaraokeNiceDB;
 
-
 CREATE TABLE CoSo (
     MaCS INT AUTO_INCREMENT PRIMARY KEY,
     TenCS VARCHAR(100) NOT NULL,
@@ -71,9 +70,6 @@ CREATE TABLE KhachHang (
     TenKH VARCHAR(100) NOT NULL,
     SDT VARCHAR(15) UNIQUE, 
     Email VARCHAR(100),
-    DiaChi VARCHAR(255),
-    NgaySinh DATE,
-    GioiTinh VARCHAR(10),
     CMND VARCHAR(20),
     LoaiKhach VARCHAR(50) DEFAULT 'Thuong',
     NgayDangKy DATE DEFAULT (CURRENT_DATE),
@@ -330,7 +326,7 @@ CREATE TABLE ChiTietGoiTiec (
     FOREIGN KEY (MaHang) REFERENCES MatHang(MaHang)
 );
 
--- Indexes để tăng performance
+-- ============= CREATE INDEXES =============
 CREATE INDEX idx_phong_trangthai ON Phong(TrangThai);
 CREATE INDEX idx_phong_coso ON Phong(MaCS);
 CREATE INDEX idx_phong_loai ON Phong(MaLoai);
@@ -350,84 +346,197 @@ CREATE INDEX idx_bangchamcong_nhanvien ON BangChamCong(MaNV);
 CREATE INDEX idx_bangchamcong_ngaylam ON BangChamCong(NgayLam);
 CREATE INDEX idx_bangluong_nhanvien ON BangLuong(MaNV);
 CREATE INDEX idx_bangluong_thangnam ON BangLuong(Thang, Nam);
-
-ALTER TABLE KhachHang DROP COLUMN DiaChi, DROP COLUMN NgaySinh, DROP COLUMN GioiTinh;
-
--- ============= TÀI KHOẢN (CREDENTIALS) =============
--- Bảng lưu thông tin đăng nhập của KhachHang và NhanVien
--- Flow: Tạo KhachHang -> Tạo TaiKhoan (MaKhachHang liên kết)
-CREATE TABLE TaiKhoan (
-    MaTaiKhoan INT AUTO_INCREMENT PRIMARY KEY,
-    TenDangNhap VARCHAR(50) UNIQUE NOT NULL,
-    MatKhauHash VARCHAR(255) NOT NULL,                -- Password đã hash (BCrypt)
-    LoaiTaiKhoan VARCHAR(20) DEFAULT 'KHACH_HANG',   -- Mặc định KHACH_HANG, admin update sau nếu cần
-    MaKhachHang INT NULL,                            -- NULL nếu là NHAN_VIEN
-    MaNhanVien INT NULL,                             -- NULL nếu là KHACH_HANG
-    TrangThai VARCHAR(50) DEFAULT 'Hoat dong',       -- Hoat dong / Bi khoa
-    NgayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    NgayCapNhat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (MaKhachHang) REFERENCES KhachHang(MaKH) ON DELETE CASCADE,
-    FOREIGN KEY (MaNhanVien) REFERENCES NhanVien(MaNV) ON DELETE CASCADE,
-    CONSTRAINT chk_loai CHECK (LoaiTaiKhoan IN ('KHACH_HANG', 'NHAN_VIEN')),
-    CONSTRAINT chk_taikhoan_link CHECK (
-        (LoaiTaiKhoan = 'KHACH_HANG' AND MaKhachHang IS NOT NULL AND MaNhanVien IS NULL) OR
-        (LoaiTaiKhoan = 'NHAN_VIEN' AND MaNhanVien IS NOT NULL AND MaKhachHang IS NULL)
-    )
-);
-
--- Index để tăng tốc độ tìm kiếm
 CREATE INDEX idx_taikhoan_tendangnhap ON TaiKhoan(TenDangNhap);
 CREATE INDEX idx_taikhoan_loai ON TaiKhoan(LoaiTaiKhoan);
 CREATE INDEX idx_taikhoan_makhachhang ON TaiKhoan(MaKhachHang);
 CREATE INDEX idx_taikhoan_manhanvien ON TaiKhoan(MaNhanVien);
 CREATE INDEX idx_taikhoan_trangthai ON TaiKhoan(TrangThai);
 
+-- ============= DELETE OLD DATA (Clean slate) =============
+-- Disable safe update mode to allow DELETE without WHERE clause
+SET SQL_SAFE_UPDATES = 0;
+
+DELETE FROM ChiTietKiemKe;
+DELETE FROM ChiTietPhieuXuat;
+DELETE FROM ChiTietPhieuNhap;
+DELETE FROM ChiTietTiec;
+DELETE FROM ChiTietGoiMon;
+DELETE FROM ChiTietGoiTiec;
+DELETE FROM BangLuong;
+DELETE FROM BangChamCong;
+DELETE FROM PhieuKiemKe;
+DELETE FROM PhieuXuat;
+DELETE FROM PhieuNhap;
+DELETE FROM HoaDon;
+DELETE FROM DonGoiMon;
+DELETE FROM PhieuSuDung;
+DELETE FROM DonDatTiec;
+DELETE FROM PhieuDatPhong;
+DELETE FROM CauHinhGia;
+DELETE FROM Phong;
+DELETE FROM TaiKhoan;
+DELETE FROM NhanVien;
+DELETE FROM TheThanhVien;
+DELETE FROM KhachHang;
+DELETE FROM GoiTiec;
+DELETE FROM DoiTac;
+DELETE FROM MatHang;
+DELETE FROM CaLamViec;
+DELETE FROM NhaCungCap;
+DELETE FROM LoaiPhong;
+DELETE FROM CoSo;
+
+-- Re-enable safe update mode
+SET SQL_SAFE_UPDATES = 1;
+
+-- Reset AUTO_INCREMENT
+ALTER TABLE CoSo AUTO_INCREMENT = 1;
+ALTER TABLE LoaiPhong AUTO_INCREMENT = 1;
+ALTER TABLE CaLamViec AUTO_INCREMENT = 1;
+ALTER TABLE NhaCungCap AUTO_INCREMENT = 1;
+ALTER TABLE MatHang AUTO_INCREMENT = 1;
+ALTER TABLE DoiTac AUTO_INCREMENT = 1;
+ALTER TABLE GoiTiec AUTO_INCREMENT = 1;
+ALTER TABLE KhachHang AUTO_INCREMENT = 1;
+ALTER TABLE TheThanhVien AUTO_INCREMENT = 1;
+ALTER TABLE NhanVien AUTO_INCREMENT = 1;
+ALTER TABLE Phong AUTO_INCREMENT = 1;
+ALTER TABLE CauHinhGia AUTO_INCREMENT = 1;
+ALTER TABLE PhieuDatPhong AUTO_INCREMENT = 1;
+ALTER TABLE DonDatTiec AUTO_INCREMENT = 1;
+ALTER TABLE PhieuSuDung AUTO_INCREMENT = 1;
+ALTER TABLE DonGoiMon AUTO_INCREMENT = 1;
+ALTER TABLE HoaDon AUTO_INCREMENT = 1;
+ALTER TABLE PhieuNhap AUTO_INCREMENT = 1;
+ALTER TABLE PhieuXuat AUTO_INCREMENT = 1;
+ALTER TABLE PhieuKiemKe AUTO_INCREMENT = 1;
+ALTER TABLE BangChamCong AUTO_INCREMENT = 1;
+ALTER TABLE BangLuong AUTO_INCREMENT = 1;
+ALTER TABLE TaiKhoan AUTO_INCREMENT = 1;
+
 -- ============= INSERT DEFAULT DATA =============
--- Insert default CoSo (Branch)
+-- 1. Insert CoSo (Branch)
 INSERT INTO CoSo (TenCS, DiaChi, SDT) VALUES
-('Chi Nhánh Trung Tâm', '123 Đường Âm Nhạc, Quận 1, TP.HCM', '0123456789');
+('Chi Nhánh Trung Tâm', '123 Đường Âm Nhạc, Quận 1, TP.HCM', '0123456789'),
+('Chi Nhánh Phía Nam', '456 Đường Sơn Ca, Quận 3, TP.HCM', '0987654321');
 
--- Insert default NhanVien (Admin)
+-- 2. Insert LoaiPhong (Room Types)
+INSERT INTO LoaiPhong (TenLoai, SucChua, GiaTheoGio, MoTa) VALUES
+('VIP', 10, 300000, 'Phòng VIP cao cấp'),
+('Thường', 8, 200000, 'Phòng thường'),
+('Nhỏ', 4, 100000, 'Phòng nhỏ');
+
+-- 3. Insert Phong (Rooms)
+INSERT INTO Phong (TenPhong, TrangThai, MaCS, MaLoai, Tang) VALUES
+('P101', 'Trong', 1, 1, 1),
+('P102', 'Trong', 1, 2, 1),
+('P103', 'Trong', 1, 3, 1),
+('P104', 'Trong', 1, 1, 1),
+('P105', 'Trong', 1, 2, 1),
+('P106', 'Trong', 1, 3, 1),
+('P201', 'Trong', 1, 1, 2),
+('P202', 'Trong', 1, 2, 2),
+('P203', 'Trong', 1, 3, 2),
+('P204', 'Trong', 1, 1, 2),
+('P205', 'Trong', 1, 2, 2),
+('P206', 'Trong', 1, 3, 2),
+('P301', 'Trong', 1, 1, 3),
+('P302', 'Trong', 1, 2, 3),
+('P303', 'Trong', 1, 3, 3),
+('P304', 'Trong', 1, 1, 3),
+('P305', 'Trong', 1, 2, 3),
+('P306', 'Trong', 1, 3, 3);
+
+-- 4. Insert CaLamViec (Work Shifts)
+INSERT INTO CaLamViec (TenCa, GioBatDau, GioKetThuc) VALUES
+('Sáng', '08:00:00', '16:00:00'),
+('Chiều', '16:00:00', '00:00:00'),
+('Đêm', '00:00:00', '08:00:00');
+
+-- 5. Insert NhanVien (Staff)
 INSERT INTO NhanVien (HoTen, ChucVu, SDT, Email, DiaChi, NgayVaoLam, HeSoLuong, TrangThai, MaCS) VALUES
-('Quản Trị Viên', 'Quản Trị Hệ Thống', '0123456789', 'admin@karaoke.com', 'Hệ Thống', CURRENT_DATE, 1.5, 'Dang lam viec', 1);
+('Quản Trị Viên', 'Quản Trị Hệ Thống', '0901111111', 'admin@karaoke.com', 'Hệ Thống', CURRENT_DATE, 1.5, 'Dang lam viec', 1),
+('Trần Quốc A', 'Tiếp Tân', '0912345678', 'staff1@karaoke.com', 'TP.HCM', CURRENT_DATE, 1.0, 'Dang lam viec', 1),
+('Phạm Thị B', 'Thu Ngân', '0912345679', 'staff2@karaoke.com', 'TP.HCM', CURRENT_DATE, 1.0, 'Dang lam viec', 1),
+('Lê Văn C', 'Phục Vụ', '0912345680', 'staff3@karaoke.com', 'TP.HCM', CURRENT_DATE, 0.8, 'Dang lam viec', 1),
+('Nguyễn Thị D', 'Phục Vụ', '0912345681', 'staff4@karaoke.com', 'TP.HCM', CURRENT_DATE, 0.8, 'Dang lam viec', 1);
 
--- Insert default TaiKhoan for Admin (Password: 123321 - BCrypt hash)
-INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, LoaiTaiKhoan, MaNhanVien, TrangThai) VALUES
-('admin', '$2a$10$zutSZ14RbyEFDrVzmfBroOPS4bsarKg3jqne7I107inN329T3YN6K', 'NHAN_VIEN', 1, 'Hoat dong');
+-- 6. Insert KhachHang (Customers)
+INSERT INTO KhachHang (TenKH, SDT, Email, CMND, LoaiKhach) VALUES
+('Nguyễn Văn A', '0901234567', 'a@example.com', '123456789', 'VIP'),
+('Trần Thị B', '0901234568', 'b@example.com', '987654321', 'Thuong'),
+('Phạm Văn C', '0901234569', 'c@example.com', '555666777', 'Thuong'),
+('Lê Thị D', '0901234570', 'd@example.com', '222333444', 'Thuong'),
+('Võ Văn E', '0901234571', 'e@example.com', '777888999', 'Thuong');
 
--- ============= INSERT SAMPLE MENU ITEMS (MatHang) =============
--- Đồ Ăn (Food)
+-- 7. Insert TheThanhVien (Loyalty Cards)
+INSERT INTO TheThanhVien (MaKH, HangThe, DiemTichLuy, NgayCap) VALUES
+(1, 'VIP', 1000, CURRENT_DATE),
+(2, 'Dong', 500, CURRENT_DATE),
+(3, 'Dong', 300, CURRENT_DATE),
+(4, 'Dong', 200, CURRENT_DATE),
+(5, 'Dong', 100, CURRENT_DATE);
+
+-- 8. Insert MatHang (Menu Items)
 INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
-('Gà rán', 'Đồ Ăn', 20, 'cái', 50000, 85000, 'Gà rán giòn ngoài mềm trong', 'Con hang'),
-('Cơm tấm', 'Đồ Ăn', 15, 'suất', 40000, 65000, 'Cơm tấm cá chiên', 'Con hang'),
-('Mỳ Ý', 'Đồ Ăn', 10, 'suất', 45000, 75000, 'Mỳ Ý sốt cà chua tươi', 'Con hang'),
-('Pizza', 'Đồ Ăn', 8, 'cái', 60000, 120000, 'Pizza hải sản tươi', 'Con hang'),
-('Bánh mì', 'Đồ Ăn', 25, 'cái', 15000, 35000, 'Bánh mì thịt xá xíu', 'Con hang');
+('Bia Heineken', 'Đồ Uống', 100, 'Lon', 15000, 35000, 'Bia Heineken 330ml', 'Con hang'),
+('Nước Ngọt Coca', 'Đồ Uống', 50, 'Chai', 8000, 20000, 'Coca Cola 1.5L', 'Con hang'),
+('Mực Chiên', 'Thức Ăn', 30, 'Suất', 40000, 80000, 'Mực chiên giòn', 'Con hang'),
+('Gà Quay', 'Thức Ăn', 25, 'Suất', 60000, 120000, 'Gà quay vàng ươm', 'Con hang'),
+('Bánh Mì', 'Thức Ăn', 40, 'Cái', 5000, 15000, 'Bánh mì nóng', 'Con hang'),
+('Nước Cam', 'Đồ Uống', 20, 'Cốc', 5000, 25000, 'Nước cam ép tươi', 'Con hang');
 
--- Đồ Uống (Drinks)
-INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
-('Nước cam', 'Đồ Uống', 30, 'ly', 12000, 25000, 'Nước cam tươi ép mỗi ngày', 'Con hang'),
-('Nước Coke', 'Đồ Uống', 25, 'chai', 8000, 20000, 'Coca Cola lạnh', 'Con hang'),
-('Café', 'Đồ Uống', 18, 'ly', 12000, 30000, 'Café đen nóng/lạnh', 'Con hang'),
-('Trà xanh', 'Đồ Uống', 22, 'ly', 10000, 25000, 'Trà xanh tươi', 'Con hang'),
-('Smoothie', 'Đồ Uống', 12, 'ly', 20000, 45000, 'Smoothie trái cây mùa hè', 'Con hang');
+-- 9. Insert GoiTiec (Party Packages)
+INSERT INTO GoiTiec (TenGoi, MoTa, SoLuongBanToiThieu, GiaTronGoi) VALUES
+('Gói Cơ Bản', 'Gồm 2 phòng, 20 người, 3 giờ, hợp đồng đơn giản', 20, 3000000),
+('Gói Tiêu Chuẩn', 'Gồm 3 phòng VIP, 50 người, 4 giờ, DJ, ánh sáng', 50, 8000000),
+('Gói Cao Cấp', 'Gồm 5 phòng VIP, 100 người, 5 giờ, DJ, ban nhạc sống', 100, 15000000);
 
--- Rượu & Bia (Alcohol)
-INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
-('Bia Saigon', 'Rượu & Bia', 40, 'chai', 20000, 35000, 'Bia Saigon lạnh', 'Con hang'),
-('Bia Heineken', 'Rượu & Bia', 20, 'chai', 30000, 50000, 'Bia Heineken nhập khẩu', 'Con hang'),
-('Rượu Vodka', 'Rượu & Bia', 8, 'chai', 100000, 150000, 'Vodka Skyy cao cấp', 'Con hang'),
-('Bia Corona', 'Rượu & Bia', 15, 'chai', 25000, 45000, 'Bia Corona', 'Con hang'),
-('Rượu Vang đỏ', 'Rượu & Bia', 5, 'chai', 150000, 250000, 'Rượu Vang đỏ Pháp', 'Con hang');
+-- 10. Insert DoiTac (Partners)
+INSERT INTO DoiTac (TenDT, SDT, TyLeHoaHong) VALUES
+('Công Ty A', '0111111111', 0.05),
+('Công Ty B', '0222222222', 0.07),
+('Công Ty C', '0333333333', 0.10);
 
--- Tráng Miệng (Dessert)
-INSERT INTO MatHang (TenHang, LoaiHang, SoLuongTon, DonViTinh, GiaNhap, GiaBan, MoTa, TrangThai) VALUES
-('Kem ốc quế', 'Tráng Miệng', 12, 'cái', 15000, 30000, 'Kem ốc quế vani', 'Con hang'),
-('Bánh flan', 'Tráng Miệng', 15, 'cái', 10000, 20000, 'Bánh flan trứng', 'Con hang'),
-('Choco cake', 'Tráng Miệng', 8, 'miếng', 25000, 50000, 'Bánh chocolate tươi', 'Con hang'),
-('Pudding', 'Tráng Miệng', 10, 'cái', 12000, 25000, 'Pudding sô cô la', 'Con hang');
+-- 11. Insert TaiKhoan (Accounts) - Password: admin123 (BCrypt hash)
+INSERT INTO TaiKhoan (TenDangNhap, MatKhauHash, LoaiTaiKhoan, MaNhanVien, MaKhachHang, TrangThai) VALUES
+('admin', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'NHAN_VIEN', 1, NULL, 'Hoat dong'),
+('tieptan', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'NHAN_VIEN', 2, NULL, 'Hoat dong'),
+('staff2', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'NHAN_VIEN', 3, NULL, 'Hoat dong'),
+('khach1', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'KHACH_HANG', NULL, 4, 'Hoat dong'),
+('khach2', '$2a$10$oSCZojFCV1WyLlJNpuU6nOD/j7DLZJJ7A3uAzcAo1sZ3FToJYTcJq', 'KHACH_HANG', NULL, 5, 'Hoat dong');
 
--- ============= MIGRATION: Add Tang & ViTri columns if they don't exist =============
-ALTER TABLE Phong ADD COLUMN Tang INT DEFAULT 1 AFTER MaLoai;
+-- 12. Insert PhieuDatPhong (Booking Records)
+INSERT INTO PhieuDatPhong (MaKH, MaPhong, MaDT, NgayDat, GioDat, GioKetThuc, SoNguoi, TienCoc, TrangThai) VALUES
+(1, 1, NULL, NOW(), '2025-12-01 10:00:00', '2025-12-01 12:00:00', 8, 100000, 'Da dat'),
+(2, 2, NULL, NOW(), '2025-12-05 14:00:00', '2025-12-05 16:30:00', 6, 80000, 'Da dat'),
+(3, 3, NULL, NOW(), '2025-12-10 18:00:00', '2025-12-10 21:00:00', 4, 50000, 'Da dat'),
+(4, 4, NULL, NOW(), '2025-12-15 11:00:00', '2025-12-15 13:00:00', 10, 120000, 'Da dat'),
+(5, 5, NULL, NOW(), '2025-12-20 19:00:00', '2025-12-20 22:00:00', 8, 100000, 'Da dat');
 
+-- 13. Insert PhieuSuDung (Service Usage)
+INSERT INTO PhieuSuDung (MaPhieuSuDung, MaPhong, MaPhieuDat, MaNV, GioBatDau, GioKetThuc, TrangThai) VALUES
+(1, 1, 1, 2, '2025-12-01 10:00:00', '2025-12-01 12:00:00', 'Ket thuc'),
+(2, 2, 2, 2, '2025-12-05 14:00:00', '2025-12-05 16:30:00', 'Ket thuc'),
+(3, 3, 3, 3, '2025-12-10 18:00:00', '2025-12-10 21:00:00', 'Ket thuc'),
+(4, 4, 4, 2, '2025-12-15 11:00:00', '2025-12-15 13:00:00', 'Ket thuc'),
+(5, 5, 5, 3, '2025-12-20 19:00:00', '2025-12-20 22:00:00', 'Ket thuc'),
+(6, 1, NULL, 2, '2025-11-01 15:00:00', '2025-11-01 17:00:00', 'Ket thuc'),
+(7, 2, NULL, 3, '2025-11-10 20:00:00', '2025-11-10 23:00:00', 'Ket thuc'),
+(8, 3, NULL, 2, '2025-10-05 09:00:00', '2025-10-05 11:00:00', 'Ket thuc'),
+(9, 4, NULL, 3, '2025-10-15 16:00:00', '2025-10-15 18:30:00', 'Ket thuc');
 
+-- 14. Insert HoaDon (Invoices) - Monthly/Yearly Revenue Data for Testing
+INSERT INTO HoaDon (MaPhieuSuDung, MaKH, NgayLap, TienPhong, TienDichVu, TongTienChuaThue, ThueVAT, GiamGia, TongTien, TienCocDaTra, ConPhaiTra, HinhThucThanhToan, TrangThai, MaNVThanhToan) VALUES
+-- December 2025
+(1, 1, '2025-12-01 12:30:00', 600000, 200000, 800000, 80000, 0, 880000, 880000, 0, 'Tien mat', 'Hoai thanh toan', 2),
+(2, 2, '2025-12-05 16:45:00', 500000, 150000, 650000, 65000, 0, 715000, 715000, 0, 'The', 'Hoai thanh toan', 2),
+(3, 3, '2025-12-10 21:15:00', 800000, 300000, 1100000, 110000, 0, 1210000, 1210000, 0, 'Tien mat', 'Hoai thanh toan', 3),
+(4, 4, '2025-12-15 13:20:00', 550000, 180000, 730000, 73000, 0, 803000, 803000, 0, 'Tien mat', 'Hoai thanh toan', 2),
+(5, 5, '2025-12-20 22:30:00', 700000, 250000, 950000, 95000, 0, 1045000, 1045000, 0, 'The', 'Hoai thanh toan', 3),
+-- November 2025
+(6, 1, '2025-11-01 17:15:00', 500000, 160000, 660000, 66000, 0, 726000, 726000, 0, 'Tien mat', 'Hoai thanh toan', 2),
+(7, 2, '2025-11-10 23:30:00', 750000, 280000, 1030000, 103000, 0, 1133000, 1133000, 0, 'The', 'Hoai thanh toan', 3),
+-- October 2025
+(8, 3, '2025-10-05 11:20:00', 600000, 200000, 800000, 80000, 0, 880000, 880000, 0, 'Tien mat', 'Hoai thanh toan', 2),
+(9, 4, '2025-10-15 18:45:00', 650000, 150000, 800000, 80000, 0, 880000, 880000, 0, 'The', 'Hoai thanh toan', 3);
